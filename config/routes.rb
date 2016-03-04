@@ -13,6 +13,7 @@ Rails.application.routes.draw do
 
       resources :states, only: [:index, :show]
       resources :cities, only: [:index, :show]
+      resources :movies, only: [:index, :show]
       resources :movie_theaters, only: [:index, :show]
     end
   end
