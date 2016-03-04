@@ -1,2 +1,2 @@
-json.success        true
-json.movie_theaters @movie_theaters
+json.success       true
+json.movie_theater @movie_theater
