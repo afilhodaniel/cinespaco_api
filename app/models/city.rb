@@ -1,6 +1,17 @@
 class City
   include ActiveModel
 
+  NAMES = [
+    'Florianópolis',
+    'João Pessoa',
+    'Novo Hamburgo',
+    'Porto Alegre',
+    'Rio de Janeiro',
+    'Santos',
+    'São Gonçalo',
+    'Tubarão'
+  ]
+
   IDS = {
     'Florianópolis' => 8,
     'João Pessoa' => 5,
