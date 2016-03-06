@@ -1,4 +1,4 @@
-== Cinépolis API
+== Cinespaço API
 
 Este é um projeto de código aberto que tem como objetivo manter uma API simples e funcional para que aplicações diversas possam consumir a programação de salas e horários de filmes em cartaz do Cinespaço, uma das principais redes de cinema do país.
 
