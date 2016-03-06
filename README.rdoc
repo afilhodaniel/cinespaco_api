@@ -1,149 +1,302 @@
-== README
+== Cinépolis API
 
-<b>rails_app</b> é apenas um projeto Rails com algumas configurações e funcionalidades já implementadas.
+Este é um projeto de código aberto que tem como objetivo manter uma API simples e funcional para que aplicações diversas possam consumir a programação de salas e horários de filmes em cartaz do Cinespaço, uma das principais redes de cinema do país.
 
-=== Requerimentos e configurações recomendadas
+Tudo o que você precisa saber é que o projeto foi desenvolvido com Rails e é basicamente um parser do site oficial do {Cinespaço}[http://cinespaco.com.br/]. Então, acabei usando uma boa dose da fantástica gem {Nokogiri}[http://www.nokogiri.org/] e também um pouquinho da {HTTParty}[https://github.com/jnunemaker/httparty].
+
+Caso queira ver a API em ação, acesse: {https://cinespacoapi.heroku.com}[https://cinespacoapi.heroku.com]. Sinta-se livre para contribuir como quiser. Toda ajuda será bem-vinda!
+
+=== Recomendado
 
 * Ruby 2.3.0 ou superior
 * Rails 4.2.5.1
-* {ImageMagick}[http://www.imagemagick.org/]
-* {Node.js}[https://nodejs.org]
-* {Gulp.js}[http://gulpjs.com/]
-* {Bower}[http://bower.io/]
 
 === Iniciando
 
-Baixe este repositório:
+Clone este repositório:
 
-  git clone git@github.com:afilhodaniel/rails_app
+  git clone git@github.com:afilhodaniel/cinepolis_api
 
-Instale todas as dependências nencessárias
-
-  sudo npm install
-  bower install
-
-Rode o Gulp.js:
+Instale as dependências necessárias:
   
-  gulp
+  bundle install
 
-=== Restful API
+=== Requisições
 
-O projeto conta com uma API Restful totalmente funcional e versionada, que pode ser evoluída ou substituída conforme as necessidades do seu projeto. Um modelo de usuário também já está configurado como recurso desta API.
+* GET /api/v1/states.json
+* GET /api/v1/states/:uf.json
+* GET /api/v1/cities.json
+* GET /api/v1/cities/:id.json
+* GET /api/v1/movie_theaters.json
+* GET /api/v1/movie_theaters/:id.json
+* GET /api/v1/movies.json
+* GET /api/v1/movies/:id.json
 
-Vale a pena ressaltar que esta API só responde requisições feitas em JSON.
+<b>GET /api/v1/states.json</b>
 
-<b>Rotas</b>
+Retorna um JSON com todos os estados e suas cidades. Exemplo:
 
-Por padrão, apenas os métodos <b>index</b>, <b>show</b>, <b>create</b>, <b>update</b> e <b>destroy</b> estarão disponíveis para qualquer recurso controlado pela API.
-
-Crie novas rotas adicionando e/ou aninhando recursos no seu arquivo <b>config/routes.rb</b>:
-
-  namespace :api do
-    namespace :v1 do
-      resources :users, only: [:index, :show, :create, :update, :destroy]
-    end
-  end
-
-Todas as rotas seguem o padrão abaixo (exceto rotas aninhadas):
-
-* GET /api/v1/users.json
-* POST /api/v1/users.json
-* GET /api/v1/users/:id.json
-* PUT/PATCH /api/v1/users/:id.json
-* DELETE /api/v1/users/:id.json
-  
-<b>Controladores</b>
-
-Crie novos controladores dentro do diretório <b>app/controllers/api/v1</b> e estenda a classe <b>BaseController</b>. Veja o arquivo <b>users_controllers.rb</b> como exemplo:
-
-  module Api
-    module V1
-      class UsersControllers < BaseController
-        ...
-        private
-          def users_params
-            ...
-          end
-          
-          def query_params
-            ...
-          end
-      end
-    end
-  end
-  
-Todo controlador deve conter o método privado <b><i>resources</i>_params</b> (onde <i>resources</i> é o nome no plural do recurso que está sendo configurado), podendo ou não conter o método privado <b>query_params</b>.
-
-  private
-    def users_params
-      params.require(:user).permit(:avatar, :name, :bio, :username, :email, :password)
-    end
-    
-    def query_params
-      params.permit(:id, :username, :email)
-    end
-
-<b>users_params</b>, neste caso, é utilizado para permitir os parâmetros <i>params[:user][:avatar]</i>, <i>params[:user][:name]</i> e assim por diante, nos métodos <b>create</b> e <b>update</b>.
-
-<b>query_params</b>, pode ser usado para criar uma filtragem de resultados no método <b>index</b>.
-
-<b>Paginando resultados</b>
-
-Estamos utilizando a gem {kaminari}[https://github.com/amatsuda/kaminari] para paginar resultados no método <b>index</b>.
-
-Para paginar resultados, utilize na requisição:
-
-* GET /api/v1/users.json?page=1&page_size=5
-
-E na <i>query</i> da consulta, faça algo como:
-
-  User.all.page(params[:page]).per(:page_size)
-
-Para mais informações, visite a página do projeto.
-
-<b>Respondendo outros formatos</b>
-
-Esta API só responde requisiões do tipo JSON. Para alterar ou adicionar um novo formato de resposta, altere os métodos <b>index</b>, <b>show</b>, <b>create</b>, <b>update</b> e <b>destroy</b> da classe localizada em <b>app/controllers/api/v1/base_controller.rb</b>
-
-  respond_to do |format|
-    format.json { render :index }
-  end
-
-Qualquer requisição de outro formato não configurado, feita a um recurso da API, gerará um erro de formato desconhecido.
-
-=== Sessões de usuário
-
-Além da API Restful, este projeto também conta com um sistema de autenticação baseado em login de usuários. Logo, todos os métodos, tanto da API como de outros controladores herdarão uma ação que força a autenticação do usuário, exceto dois métodos já configurados:
-
-* POST /api/v1/users.json
-* GET /
-
-O primeiro não está protegido por autenticação porque é o responsável por permitir a criação de novos usuários dentro da aplicação.
-
-O segundo, está parcialmente protegido. Isto quer dizer que, para usuários logados e não logados, os templates renderizados são diferentes. O template <b>app/views/application/index.html.erb</b> é renderizado quando o usuário não está logado, enquanto o template <b>app/views/application/home.html.erb</b> é renderizado quando o usuário está logado.
-
-Você pode alterar esse comportamento conforme desejar, apenas alterando as classes <b>ApplicationController</b> e <b>BaseController</b>, localizadas em <b>app/controllers</b>.
-
-<b>Rotas</b>
-
-Para logar um usuário na sessáo, utilize a rota:
-
-* POST /sessions/signin.json
-
-E monte a requisição dessa maneira:
-
-  user: {
-    email: "user@sample.com",
-    password: "pass123"
+  {
+    states: [
+      {
+        uf: "SC",
+        name: "Santa Catarina",
+        url: "http://localhost:3000/api/v1/states/sc.json",
+        cities: [
+          {
+            id: 8,
+            name: "Florianópolis",
+            url: "http://localhost:3000/api/v1/cities/8.json"
+          },
+          ...
+        ]
+      },
+      ...
+    ]
   }
 
-Para deslogar um usuário da sessão, utilize a rota:
-* GET /sessions/signout
+<b>GET /api/v1/states/pb.json</b>
 
-<b>Usuário atual da sessão</b>
+Retorna um JSON com todas as cidades do estado requisitado. Exemplo:
 
-Em qualquer controlador ou view que herde direta ou indiretamente a classe<b>ApplicationController</b>, você tem a variável de instância <b>@current_user</b>, que contém todas as informações do usuário atual da sessão.
+  {
+    success: true,
+    state: {
+      uf: "PB",
+      name: "Paraíba",
+      url: "http://localhost:3000/api/v1/states/pb.json"
+      cities: [
+        {
+          id: 5,
+          name: "João Pessoa",
+          url: "http://localhost:3000/api/v1/cities/5.json"
+        },
+        ...
+      ]
+    }
+  }
 
-=== Outras observações
+<b>GET /api/v1/cities.json</b>
 
-* Estamos usando a gem {paperclip}[https://github.com/thoughtbot/paperclip] para adicionar a funcionalidade de upload de arquivos
+Retorna um JSON com todas as cidades e suas unidades de cinema. Exemplo:
+
+  {
+    cities: [
+      {
+        id: 8,
+        name: "Florianópolis",
+        url: "http://localhost:3000/api/v1/cities/8.json",
+        state: {
+          uf: "SC",
+          name: "Santa Catarina",
+          url: "http://localhost:3000/api/v1/states/sc.json"
+        }
+        movie_theaters: [
+          {
+            id: 8,
+            name: "Beiramar Shopping",
+            url: "http://localhost:3000/api/v1/movie_theaters/8.json"
+          },
+          ...
+        ]
+      },
+      ...
+    ]
+  }
+
+<b>GET /api/v1/cities/5.json</b>
+
+Retorna um JSON com todas as informações sobre a cidade requisitada e todas as suas unidades de cinema. Exemplo:
+
+  {
+    success: true,
+    city: {
+      id: "5",
+      name: "João Pessoa",
+      url: "http://localhost:3000/api/v1/cities/5.json",
+      state: {
+        uf: "PB",
+        name: "Paraíba",
+        url: "http://localhost:3000/api/v1/states/pb.json"
+      },
+      movie_theaters: [
+        {
+          id: "5",
+          name: "Mag Shopping",
+          url: "http://localhost:3000/api/v1/movie_theaters/5.json"
+        },
+        ...
+      ]
+    }
+  }
+
+<b>GET /api/v1/movie_theaters.json</b>
+
+Retorna um JSON com todas as unidades de cinema. Exemplo:
+
+  {
+    movie_theaters: [
+      {
+        id: 8,
+        name: "Beiramar Shopping",
+        url: "http://localhost:3000/api/v1/movie_theaters/8.json"
+        city: {
+          id: 8,
+          name: "Florianópolis",
+          url: "http://localhost:3000/api/v1/cities/8.json",
+          state: {
+            uf: "SC",
+            name: "Santa Catarina",
+            url: "http://localhost:3000/api/v1/states/sc.json"
+          }
+        }
+      },
+      ...
+    ]
+  }
+
+<b>GET /api/v1/movie_theaters/:id.json</b>
+
+Retorna um JSON com a programação completa de salas e horários da unidade de cinema em questão. Exemplo:
+
+  {
+    success: true,
+    movie_theater: {
+      id: 5,
+      name: "Mag Shopping",
+      url: "http://localhost:3000/api/v1/movie_theaters/5.json",
+      city: {
+        id: 5,
+        name: "João Pessoa",
+        url: "http://localhost:3000/api/v1/cities/5.json",
+        state: {
+          uf: "PB",
+          name: "Paraíba",
+          url: "http://localhost:3000/api/v1/states/pb.json"
+        }
+      },
+      weeks: [
+        {
+          from: "03/03",
+          to: "09/03",
+          sessions: [
+            {
+              room: "1",
+              movie: {
+                id: "apaixonados-o-filme",
+                name: "Apaixonados - O Filme",
+                url: "http://localhost:3000/api/v1/movies/apaixonados-o-filme.json",
+                pg: "10",
+                subtitled: false,
+                dubbed: true
+              },
+              3d: false,
+              imax: false,
+              vip: false,
+              hours: [
+                "14:30",
+                "16:50",
+                "19:10",
+                "21:20"
+              ]
+            },
+            ...
+          ]
+        },
+        ...
+      ]
+    }
+  }
+
+<b>GET /api/v1/movies.json</b>
+
+Retorna um JSON com todos os filmes em cartaz. Exemplo:
+
+  {
+    movies: [
+      {
+        id: "a-garota-dinamarquesa",
+        name: "A Garota Dinamarquesa",
+        url: "http://localhost:3000/api/v1/movies/a-garota-dinamarquesa.json"
+      },
+      ...
+    ]
+  }
+
+<b>GET /api/v1/movies/:id.json</b>
+
+Retorna um JSON com todas as informações sobre o filme em questão e a programação completa de salas e horários de todas as unidades de cinema em que o filme está sendo exibido, organizada por cidade. Exemplo:
+
+  {
+    success: true,
+    movie: {
+      id: "deadpool",
+      image: "http://cinespaco.com.br/_img/_filmes/871_m.jpg",
+      trailer: "http://www.youtube.com/embed/jtukwSBmrNo",
+      name: "Deadpool",
+      original_name: "Deadpool",
+      pg: "16",
+      sinopse: "Ex-militar e mercenário, Wade Wilson (Ryan Reynolds) é diagnosticado com câncer em estado terminal, porém encontra uma possibilidade de cura em uma sinistra experiência científica. Recuperado, com poderes e um incomum senso de humor, ele torna-se Deadpool e busca vingança contra o homem que destruiu sua vida.",
+      cast: "Ryan Reynolds, Morena Baccarin, Ed Skrein",
+      director: "Tim Miller",
+      cities: [
+        {
+          id: 8,
+          name: "Florianópolis",
+          url: "http://localhost:3000/api/v1/cities/8.json",
+          state: {
+            uf: "SC",
+            name: "Santa Catarina",
+            url: "http://localhost:3000/api/v1/states/sc.json"
+          },
+          movie_theaters: [
+            {
+              id: 8,
+              name: "Beiramar Shopping",
+              url: "http://localhost:3000/api/v1/movie_theaters/8.json",
+              sessions: [
+                {
+                  room: "2",
+                  subtitled: true,
+                  dubbed: false,
+                  3d: false,
+                  imax: false,
+                  vip: false,
+                  hours: [
+                    "22:00"
+                  ]
+                },
+                ...
+              ]
+            },
+            ...
+          ]
+        },
+        ...
+      ]
+    }
+  }
+
+<b>404</b>
+
+No caso de você solicitar algum recurso que não existe, a API retornará algo como isso:
+
+  {
+    success: false,
+    errors: {
+      movie: "Movie doesn't exists"
+    }
+  }
+
+
+=== Outros Projetos
+
+Também fiz outros projetos de API de outros cinemas. Todos seguem exatamente (ou quase) a mesma estrutura. Confira nos links abaixo:
+
+<b>Cinépolis API:</b> {https://github.com/afilhodaniel/cinepolis_api}[https://github.com/afilhodaniel/cinepolis_api]
+
+=== Observações
+
+1. Você pode usar este projeto como bem entender. Mas sugiro não usar o deploy do Heroku citado mais acima. Trata-se de um deploy que eu fiz apenas para demonstrar o funcionamento da API. Faça seu próprio deploy, em um servidor profissional.
+
+2. Caso queria entender melhor sobre a estrutura do projeto, acesse: {https://github.com/afilhodaniel/rails_app}[https://github.com/afilhodaniel/rails_app]
