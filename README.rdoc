@@ -288,7 +288,6 @@ No caso de você solicitar algum recurso que não existe, a API retornará algo 
     }
   }
 
-
 === Outros Projetos
 
 Também fiz outros projetos de API de outros cinemas. Todos seguem exatamente (ou quase) a mesma estrutura. Confira nos links abaixo:
